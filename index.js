@@ -1,29 +1,31 @@
 const express = require("express");
-var http = require("http");
 const app = express();
-const port = process.env.PORT || 3000;
-var server = http.createServer(app);
-var io = require("socket.io")(server);
+const http = require("http");
+const cors = require("cors");
+const { Server } = require("socket.io");
+app.use(cors());
 
-//middlewre
-app.use(express.json());
-var clients = {};
+const server = http.createServer(app);
+
+const io = new Server(server);
 
 io.on("connection", (socket) => {
-  console.log("connetetd");
-  console.log(socket.id, "has joined");
-  socket.on("signin", (id) => {
-    console.log(id);
-    clients[id] = socket;
-    console.log(clients);
+  console.log(`User Connected: ${socket.id}`);
+
+  socket.on("join_room", (data) => {
+    socket.join(data);
+    console.log(`User with ID: ${socket.id} joined room: ${data}`);
   });
-  socket.on("message", (msg) => {
-    console.log(msg);
-    let targetId = msg.targetId;
-    if (clients[targetId]) clients[targetId].emit("message", msg);
+
+  socket.on("send_message", (data) => {
+    socket.to(data.room).emit("receive_message", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User Disconnected", socket.id);
   });
 });
 
-server.listen(port, "0.0.0.0", () => {
-  console.log("server started");
+server.listen(3001, () => {
+  console.log("SERVER RUNNING");
 });
