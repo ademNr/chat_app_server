@@ -14,11 +14,12 @@ io.on("connection", (socket) => {
 
   socket.on("join_room", (data) => {
     socket.join(data);
-    console.log(`User with ID: ${socket.id} joined room: ${data}`);
+    console.log(`User with ID: ${socket.id} with the name ${ data.joinerName } joined room: ${data.room}`);
   });
 
   socket.on("send_message", (data) => {
     socket.to(data.room).emit("receive_message", data);
+    console.log(`User with ID: ${socket.id} with the name of ${data.senderName} sent a message : ${data.message} in the room ${data.room}`);
   });
 
   socket.on("disconnect", () => {
@@ -26,6 +27,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3001, () => {
+server.listen(3000, () => {
   console.log("SERVER RUNNING");
 });
